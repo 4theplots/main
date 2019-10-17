@@ -4,17 +4,17 @@ ip=$1
 
 
 init() {
-	echo "" | cat > system_metrics.csv
-	echo "" | cat > apm1_metrics.csv
-	echo "" | cat > apm2_metrics.csv
-	echo "" | cat > apm3_metrics.csv
-	echo "" | cat > apm4_metrics.csv
-	echo "" | cat > apm5_metrics.csv
-	echo "" | cat > apm6_metrics.csv
+	echo | cat > system_metrics.csv
+	echo | cat > apm1_metrics.csv
+	echo | cat > apm2_metrics.csv
+	echo | cat > apm3_metrics.csv
+	echo | cat > apm4_metrics.csv
+	echo | cat > apm5_metrics.csv
+	echo | cat > apm6_metrics.csv
 
 	pkill ifstat
 
-	ifstat -d 100 &
+	ifstat -d 1 &
 
 	./APM1 $ip &
 
@@ -25,7 +25,7 @@ init() {
 
 	echo $lastid | cat >> id.txt
 
-	./APM2 192.168.179.1 &
+	./APM2 $ip &
 
 	lastid=$!
 
@@ -68,6 +68,7 @@ init() {
 }
 
 finish() {
+    echo
     echo "This script was in an infinite while loop for $SECONDS seconds"
     while [ $(wc -l id.txt | cut -d ' ' -f 1) -gt 0 ]
     do
@@ -78,6 +79,8 @@ finish() {
 	    cat temp.txt > id.txt
     done
 	    pkill ifstat
+	    rm id.txt
+            rm temp.txt
 }
 trap finish EXIT
 
@@ -92,7 +95,7 @@ process() {
 system() {
 	access=$(iostat -k sda | awk '{print $4}' | tail -n -2 | head -n 1)
 	util=$(df / --block-size M | awk '{print $3}' | tail -n -1 | tr -cd '0-9\n')
-	net=$(ifstat | awk '$1 == "ens33" {print $7","$9}')
+	net=$(ifstat | awk '$1 == "ens33" {print $7","$9}' | tr -cd '0-9,\n')
 
 	echo "$access, $util, $net" | cat >> "system_metrics.csv"
 }
