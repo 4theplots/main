@@ -97,7 +97,7 @@ system() {
 	util=$(df / --block-size M | awk '{print $3}' | tail -n -1 | tr -cd '0-9\n')
 	net=$(ifstat | awk '$1 == "ens33" {print $7","$9}' | tr -cd '0-9,\n')
 
-	echo "$access, $util, $net" | cat >> "system_metrics.csv"
+	echo "$net, $access, $util" | cat >> "system_metrics.csv"
 }
 
 write_data() {
